@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Renewal Tracker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --surface2: #f0efe9;
+      --border: rgba(0,0,0,0.1);
+      --border2: rgba(0,0,0,0.18);
+      --text: #1a1917;
+      --text2: #6b6a65;
+      --text3: #9e9d97;
+      --danger: #c0392b;
+      --danger-bg: #fdf0ee;
+      --warn: #b7650a;
+      --warn-bg: #fef6e4;
+      --ok: #1a7a4a;
+      --ok-bg: #eaf6ef;
+      --info: #1a4a8a;
+      --info-bg: #e8f0fc;
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141413;
+        --surface: #1e1d1b;
+        --surface2: #252421;
+        --border: rgba(255,255,255,0.09);
+        --border2: rgba(255,255,255,0.16);
+        --text: #f0efe9;
+        --text2: #9e9d97;
+        --text3: #6b6a65;
+        --danger: #e05c4a;
+        --danger-bg: #2a1815;
+        --warn: #e0970a;
+        --warn-bg: #2a2010;
+        --ok: #2daa6a;
+        --ok-bg: #0f2419;
+        --info: #5a8fdd;
+        --info-bg: #0f1e35;
+      }
+    }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 680px; margin: 0 auto; }
+
+    /* ── Login screen ── */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      width: 360px;
+      max-width: 100%;
+    }
+
+    .login-card h1 {
+      font-size: 22px;
+      font-weight: normal;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .login-card p {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--text3);
+      margin-bottom: 2rem;
+    }
+
+    .login-field { margin-bottom: 1rem; }
+
+    .login-field label {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .login-field input {
+      width: 100%;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .login-field input:focus { border-color: var(--text3); }
+
+    .login-error {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: var(--danger);
+      margin-bottom: 1rem;
+      min-height: 16px;
+    }
+
+    .login-btn {
+      width: 100%;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      padding: 11px;
+      border-radius: var(--radius);
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      letter-spacing: 0.3px;
+    }
+    .login-btn:hover { opacity: 0.82; }
+
+    /* ── Main app ── */
+    .app-screen { display: none; }
+    .app-screen.visible { display: block; }
+
+    .top-bar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border2);
+    }
+
+    .app-title { font-size: 26px; font-weight: normal; letter-spacing: -0.5px; }
+    .app-sub { font-family: 'Courier New', monospace; font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+    .top-right { display: flex; gap: 8px; align-items: center; }
+
+    .add-btn {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      padding: 9px 16px;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .add-btn:hover { background: var(--surface2); }
+
+    .logout-btn {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--text3);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .logout-btn:hover { color: var(--danger); border-color: rgba(192,57,43,0.3); }
+
+    .sync-bar {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+    .sync-dot.ok   { background: var(--ok); }
+    .sync-dot.busy { background: var(--warn); }
+    .sync-dot.err  { background: var(--danger); }
+
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+
+    .stat-label { font-family: 'Courier New', monospace; font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+
+    .stat-val { font-size: 28px; font-weight: normal; }
+    .stat-val.danger { color: var(--danger); }
+    .stat-val.warn   { color: var(--warn); }
+
+    .toolbar { display: flex; gap: 8px; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+
+    .search-wrap { flex: 1; min-width: 140px; }
+
+    .search-wrap input { width: 100%; font-family: 'Courier New', monospace; font-size: 12px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none; }
+    .search-wrap input::placeholder { color: var(--text3); }
+
+    .pill { font-family: 'Courier New', monospace; font-size: 11px; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .pill.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+    .list { display: flex; flex-direction: column; gap: 8px; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; display: flex; align-items: flex-start; gap: 14px; transition: border-color 0.15s; }
+    .card:hover { border-color: var(--border2); }
+    .card.overdue { border-left: 3px solid var(--danger); }
+    .card.soon    { border-left: 3px solid var(--warn); }
+
+    .icon { width: 42px; height: 42px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+    .info { flex: 1; min-width: 0; }
+
+    .svc-name { font-size: 15px; font-weight: normal; color: var(--text); display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+
+    .badge { font-family: 'Courier New', monospace; font-size: 9px; padding: 2px 7px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .badge.monthly { background: var(--info-bg); color: var(--info); }
+    .badge.yearly  { background: var(--ok-bg);   color: var(--ok);   }
+    .badge.weekly  { background: var(--warn-bg);  color: var(--warn); }
+
+    .meta-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 5px; }
+
+    .meta-item { font-family: 'Courier New', monospace; font-size: 11px; color: var(--text3); }
+    .meta-item span { color: var(--text2); }
+
+    .dur-bar-wrap { margin-top: 8px; height: 4px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
+    .dur-bar { height: 100%; border-radius: 999px; }
+
+    .card-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+    .btn-sm { font-family: 'Courier New', monospace; font-size: 10px; padding: 3px 9px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: background 0.12s; }
+    .btn-sm:hover { background: var(--surface2); }
+    .btn-sm.del { border-color: rgba(192,57,43,0.3); color: var(--danger); }
+    .btn-sm.del:hover { background: var(--danger-bg); }
+
+    .right { text-align: right; flex-shrink: 0; min-width: 85px; }
+
+    .days { font-family: 'Courier New', monospace; font-size: 12px; font-weight: bold; }
+    .days.danger { color: var(--danger); }
+    .days.warn   { color: var(--warn); }
+    .days.ok     { color: var(--ok); }
+
+    .cost { font-family: 'Courier New', monospace; font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+    .empty { text-align: center; padding: 4rem 1rem; font-family: 'Courier New', monospace; font-size: 13px; color: var(--text3); }
+
+    .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); font-family: 'Courier New', monospace; font-size: 10px; color: var(--text3); text-align: center; letter-spacing: 0.5px; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; z-index: 100; }
+    .modal-overlay.open { display: flex; }
+
+    .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 1.75rem; width: 380px; max-width: calc(100vw - 2rem); max-height: 90vh; overflow-y: auto; }
+
+    .modal h3 { font-size: 17px; font-weight: normal; margin-bottom: 1.25rem; letter-spacing: -0.3px; }
+
+    .field { margin-bottom: 14px; }
+
+    .field label { font-family: 'Courier New', monospace; font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.7px; display: block; margin-bottom: 5px; }
+
+    .field input, .field select { width: 100%; font-family: 'Courier New', monospace; font-size: 13px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); color: var(--text); outline: none; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.25rem; }
+
+    .btn-primary { font-family: 'Courier New', monospace; font-size: 12px; padding: 9px 18px; border-radius: var(--radius); background: var(--text); color: var(--bg); border: none; cursor: pointer; transition: opacity 0.15s; }
+    .btn-primary:hover { opacity: 0.82; }
+
+    @media (max-width: 480px) {
+      .stat-val { font-size: 22px; }
+      .card { flex-wrap: wrap; }
+      .right { width: 100%; text-align: left; margin-left: 56px; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login screen -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <h1>Service Tracker</h1>
+      <p>Enter your password to continue</p>
+      <div class="login-field">
+        <label>Password</label>
+        <input type="password" id="pw-input" placeholder="••••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <div class="login-error" id="login-error"></div>
+      <button class="login-btn" onclick="doLogin()">Sign in</button>
+    </div>
+  </div>
+
+  <!-- Main app -->
+  <div class="app-screen" id="app-screen">
+    <div class="container">
+
+      <div class="top-bar">
+        <div>
+          <div class="app-title">Service Tracker</div>
+          <div class="app-sub">renewal reminders &amp; subscriptions</div>
+        </div>
+        <div class="top-right">
+          <button class="logout-btn" onclick="doLogout()">Log out</button>
+          <button class="add-btn" onclick="openModal()">+ Add service</button>
+        </div>
+      </div>
+
+      <div class="sync-bar">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-msg">Connecting...</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Total</div><div class="stat-val" id="s-total">0</div></div>
+        <div class="stat"><div class="stat-label">Due soon</div><div class="stat-val warn" id="s-soon">0</div></div>
+        <div class="stat"><div class="stat-label">Overdue</div><div class="stat-val danger" id="s-overdue">0</div></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input type="text" id="search-in" placeholder="Search services..." oninput="render()" />
+        </div>
+        <button class="pill active" onclick="setFilter('all',this)">All</button>
+        <button class="pill" onclick="setFilter('overdue',this)">Overdue</button>
+        <button class="pill" onclick="setFilter('soon',this)">Due soon</button>
+      </div>
+
+      <div class="list" id="list"></div>
+
+      <div class="footer">DATA SYNCED TO CLOUD &middot; WORKS ON ALL YOUR DEVICES</div>
+    </div>
+  </div>
+
+  <!-- Edit/Add Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h3 id="modal-title">Add service</h3>
+      <div class="field">
+        <label>Service name</label>
+        <input type="text" id="f-name" placeholder="e.g. Netflix" />
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select id="f-cat">
+          <option value="Streaming">Streaming</option>
+          <option value="Internet">Internet</option>
+          <option value="Software">Software</option>
+          <option value="Cloud">Cloud / Hosting</option>
+          <option value="Domain">Domain</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Last renewed</label>
+          <input type="date" id="f-start" />
+        </div>
+        <div class="field">
+          <label>Next renewal</label>
+          <input type="date" id="f-date" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Billing cycle</label>
+        <select id="f-cycle">
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+          <option value="weekly">Weekly</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Cost (optional)</label>
+        <input type="number" id="f-cost" placeholder="e.g. 9.99" min="0" step="0.01" />
+      </div>
+      <div class="modal-actions">
+        <button class="add-btn" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveService()">Save</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const PASSWORD = 'Deslog12020!';
+  const SESSION_KEY = 'svc_auth';
+
+  const BIN_ID  = '69e749beaaba882197205a06';
+  const API_KEY = '$2a$10$cdJBTJ1mTCIV9.mC/wtVNez0YT0sMotgy/izhARAlMmLUtIT7SQsq';
+  const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+  const HEADERS = { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY };
+
+  const ICONS  = {Streaming:'🎬', Internet:'📡', Software:'💻', Cloud:'☁️', Domain:'🌐', Other:'📦'};
+  const COLORS = {Streaming:'#ddeeff', Internet:'#d8f2ea', Software:'#e8e6fd', Cloud:'#e1f5ee', Domain:'#fef2d6', Other:'#eeecea'};
+
+  let services = [], filter = 'all', editId = null, saving = false;
+
+  // ── Auth ──
+  function doLogin() {
+    const val = document.getElementById('pw-input').value;
+    if (val === PASSWORD) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').classList.add('visible');
+      document.getElementById('pw-input').value = '';
+      document.getElementById('login-error').textContent = '';
+      loadFromCloud();
+    } else {
+      document.getElementById('login-error').textContent = 'Incorrect password. Please try again.';
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').focus();
+    }
+  }
+
+  function doLogout() {
+    sessionStorage.removeItem(SESSION_KEY);
+    document.getElementById('app-screen').classList.remove('visible');
+    document.getElementById('login-screen').style.display = 'flex';
+    setTimeout(() => document.getElementById('pw-input').focus(), 100);
+  }
+
+  function checkSession() {
+    if (sessionStorage.getItem(SESSION_KEY) === '1') {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').classList.add('visible');
+      loadFromCloud();
+    } else {
+      setTimeout(() => document.getElementById('pw-input').focus(), 100);
+    }
+  }
+
+  // ── Sync ──
+  function syncStatus(state, msg) {
+    const dot = document.getElementById('sync-dot');
+    const txt = document.getElementById('sync-msg');
+    dot.className = 'sync-dot ' + state;
+    txt.textContent = msg;
+  }
+
+  async function loadFromCloud() {
+    syncStatus('busy', 'Loading...');
+    try {
+      const res = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': API_KEY } });
+      if (!res.ok) throw new Error('Load failed');
+      const data = await res.json();
+      services = data.record.services || [];
+      syncStatus('ok', 'Synced · ' + new Date().toLocaleTimeString());
+      render();
+    } catch(e) {
+      syncStatus('err', 'Could not connect — showing local data');
+      try { services = JSON.parse(localStorage.getItem('svc_backup') || '[]'); } catch(_) { services = []; }
+      render();
+    }
+  }
+
+  async function saveToCloud() {
+    if (saving) return;
+    saving = true;
+    syncStatus('busy', 'Saving...');
+    localStorage.setItem('svc_backup', JSON.stringify(services));
+    try {
+      const res = await fetch(BIN_URL, {
+        method: 'PUT',
+        headers: HEADERS,
+        body: JSON.stringify({ services })
+      });
+      if (!res.ok) throw new Error('Save failed');
+      syncStatus('ok', 'Saved · ' + new Date().toLocaleTimeString());
+    } catch(e) {
+      syncStatus('err', 'Save failed — data kept locally');
+    }
+    saving = false;
+  }
+
+  // ── Helpers ──
+  function daysUntil(ds) {
+    const n=new Date(); n.setHours(0,0,0,0);
+    const d=new Date(ds+'T00:00:00'); d.setHours(0,0,0,0);
+    return Math.round((d-n)/86400000);
+  }
+
+  function fmtDate(ds) {
+    return new Date(ds+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  }
+
+  function duration(start, end) {
+    if (!start) return null;
+    const days=Math.round((new Date(end+'T00:00:00')-new Date(start+'T00:00:00'))/86400000);
+    if (days<0) return null;
+    if (days<60) return days+'d';
+    if (days<365) return Math.round(days/30.4)+'mo';
+    const y=days/365; return (y>=2?Math.round(y):y.toFixed(1))+'yr';
+  }
+
+  function progress(start, end) {
+    if (!start) return null;
+    const s=new Date(start+'T00:00:00').getTime(), e=new Date(end+'T00:00:00').getTime(), total=e-s;
+    if (total<=0) return null;
+    return Math.min(100,Math.max(0,Math.round((Date.now()-s)/total*100)));
+  }
+
+  // ── UI ──
+  function setFilter(f, el) {
+    filter=f;
+    document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+    el.classList.add('active'); render();
+  }
+
+  function openModal(id=null) {
+    editId=id;
+    document.getElementById('modal-title').textContent=id?'Edit service':'Add service';
+    if (id) {
+      const s=services.find(x=>x.id===id);
+      document.getElementById('f-name').value=s.name;
+      document.getElementById('f-cat').value=s.cat;
+      document.getElementById('f-start').value=s.start||'';
+      document.getElementById('f-date').value=s.date;
+      document.getElementById('f-cycle').value=s.cycle;
+      document.getElementById('f-cost').value=s.cost||'';
+    } else {
+      ['f-name','f-start','f-date','f-cost'].forEach(i=>document.getElementById(i).value='');
+      document.getElementById('f-cat').value='Streaming';
+      document.getElementById('f-cycle').value='monthly';
+    }
+    document.getElementById('modal-overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('f-name').focus(),50);
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    editId=null;
+  }
+
+  async function saveService() {
+    const name=document.getElementById('f-name').value.trim();
+    const date=document.getElementById('f-date').value;
+    if (!name||!date){alert('Please enter a service name and next renewal date.');return;}
+    const s={
+      id:editId||Date.now(), name,
+      cat:document.getElementById('f-cat').value,
+      start:document.getElementById('f-start').value||null,
+      date, cycle:document.getElementById('f-cycle').value,
+      cost:parseFloat(document.getElementById('f-cost').value)||null,
+    };
+    if (editId){services=services.map(x=>x.id===editId?s:x);}
+    else{services.push(s);}
+    closeModal(); render();
+    await saveToCloud();
+  }
+
+  async function deleteService(id) {
+    if (!confirm('Remove this service?')) return;
+    services=services.filter(x=>x.id!==id);
+    render();
+    await saveToCloud();
+  }
+
+  function render() {
+    const q=(document.getElementById('search-in').value||'').toLowerCase();
+    let list=services.filter(s=>s.name.toLowerCase().includes(q)||s.cat.toLowerCase().includes(q));
+    if (filter==='overdue') list=list.filter(s=>daysUntil(s.date)<0);
+    else if (filter==='soon') list=list.filter(s=>{const d=daysUntil(s.date);return d>=0&&d<=7;});
+    list.sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+    document.getElementById('s-total').textContent=services.length;
+    document.getElementById('s-overdue').textContent=services.filter(s=>daysUntil(s.date)<0).length;
+    document.getElementById('s-soon').textContent=services.filter(s=>{const d=daysUntil(s.date);return d>=0&&d<=7;}).length;
+
+    const el=document.getElementById('list');
+    if (!list.length){el.innerHTML='<div class="empty">— no services found —</div>';return;}
+
+    el.innerHTML=list.map(s=>{
+      const d=daysUntil(s.date);
+      const cls=d<0?'overdue':d<=7?'soon':'';
+      const dayTxt=d<0?`${Math.abs(d)}d overdue`:d===0?'Due today':`${d}d left`;
+      const dayCls=d<0?'danger':d<=7?'warn':'ok';
+      const pct=progress(s.start,s.date);
+      const barColor=d<0?'#c0392b':d<=7?'#b7650a':'#1a7a4a';
+      const dur=duration(s.start,s.date);
+      const costTxt=s.cost?`$${s.cost.toFixed(2)}/${s.cycle}`:'';
+      return `<div class="card ${cls}">
+        <div class="icon" style="background:${COLORS[s.cat]||COLORS.Other}">${ICONS[s.cat]||'📦'}</div>
+        <div class="info">
+          <div class="svc-name">${s.name}<span class="badge ${s.cycle}">${s.cycle}</span></div>
+          <div class="meta-row">
+            ${s.start?`<div class="meta-item">Last renewed <span>${fmtDate(s.start)}</span></div>`:''}
+            <div class="meta-item">Next renewal <span>${fmtDate(s.date)}</span></div>
+            ${dur?`<div class="meta-item">Duration <span>${dur}</span></div>`:''}
+          </div>
+          ${pct!==null?`<div class="dur-bar-wrap"><div class="dur-bar" style="width:${pct}%;background:${barColor}"></div></div>`:''}
+          <div class="card-actions">
+            <button class="btn-sm" onclick="openModal(${s.id})">edit</button>
+            <button class="btn-sm del" onclick="deleteService(${s.id})">remove</button>
+          </div>
+        </div>
+        <div class="right">
+          <div class="days ${dayCls}">${dayTxt}</div>
+          ${costTxt?`<div class="cost">${costTxt}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+  checkSession();
+</script>
+</body>
+</html>
